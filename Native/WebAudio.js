@@ -175,6 +175,19 @@ Elm.Native.WebAudio.make = function(elm) {
 
 
   /* TODO: Audio Buffer Source Node */
+
+
+
+  /* AudioDestinationNode */
+  values.getDestinationNode = function(context) {
+    var node = extractContext(context).destination;
+    return buildAudioNode(node);
+  }
+
+  buildGetter('MaxChannelCount', 'maxChannelCount');
+
+
+
   /* TODO: Audio Worker Node */
 
 

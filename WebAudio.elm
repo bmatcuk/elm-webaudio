@@ -236,6 +236,25 @@ setSmoothingConstant = Native.WebAudio.setSmoothingConstant
 
 
 {-| TODO: Type of an AudioBufferSourceNode -}
+
+
+
+{-| Type of an AudioDestinationNode -}
+type AudioDestinationNode = AudioNode {}
+
+{-| Get the AudioDestinationNode for the given context
+
+Each context has only one AudioDestinationNode.
+-}
+getDestinationNode : AudioContext -> AudioDestinationNode
+getDestinationNode = Native.WebAudio.getDestinationNode
+
+{-| Get the maximum number of channels -}
+getMaxChannelCount : AudioDestinationNode -> Int
+getMaxChannelCount = Native.WebAudio.getMaxChannelCount
+
+
+
 {-| TODO: Type of an AudioWorkerNode -}
 
 
