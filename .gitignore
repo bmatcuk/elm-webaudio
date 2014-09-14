@@ -1,3 +1,4 @@
+examples/release/
 build/
 cache/
 *.elmi
