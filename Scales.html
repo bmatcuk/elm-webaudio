@@ -1,0 +1,590 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="UTF-8"><title>Scales</title><script type="text/javascript" src="elm-runtime.js"></script><script type="text/javascript" src="WebAudio.js"></script><script type="text/javascript">Elm.Main = Elm.Main || {};
+Elm.Main.make = function (_elm) {
+   "use strict";
+   _elm.Main = _elm.Main || {};
+   if (_elm.Main.values)
+   return _elm.Main.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Main";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Input = Elm.Graphics.Input.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var WebAudio = Elm.WebAudio.make(_elm);
+   var _op = {};
+   var checkboxWithLabel = F4(function (label,
+   handle,
+   f,
+   checked) {
+      return A3(Graphics.Element.container,
+      70,
+      30,
+      Graphics.Element.middle)(A2(Graphics.Element.flow,
+      Graphics.Element.right,
+      _L.fromArray([A3(Graphics.Input.checkbox,
+                   handle,
+                   f,
+                   checked)
+                   ,Text.plainText(label)])));
+   });
+   var Paused = {ctor: "Paused"};
+   var musicModel = {_: {}
+                    ,buttonCount: 0
+                    ,changed: false
+                    ,state: Paused};
+   var isPlaying = function (state) {
+      return function () {
+         switch (state.ctor)
+         {case "Paused": return false;}
+         return true;
+      }();
+   };
+   var stopMusic = function (oscillator) {
+      return function () {
+         var _ = A2(WebAudio.stopOscillator,
+         0.0,
+         oscillator);
+         return Paused;
+      }();
+   };
+   var Playing = F4(function (a,
+   b,
+   c,
+   d) {
+      return {ctor: "Playing"
+             ,_0: a
+             ,_1: b
+             ,_2: c
+             ,_3: d};
+   });
+   var updateNote = F4(function (oscillator,
+   tonic,
+   tones,
+   t) {
+      return function () {
+         switch (tones.ctor)
+         {case "::": return function () {
+                 var currentStep = tonic + tones._0;
+                 var frequency = 220 * Math.pow(2,
+                 currentStep / 12);
+                 var _ = A2(WebAudio.setValue,
+                 frequency,
+                 oscillator.frequency);
+                 return A4(Playing,
+                 oscillator,
+                 currentStep,
+                 tones._1,
+                 t);
+              }();
+            case "[]":
+            return stopMusic(oscillator);}
+         _E.Case($moduleName,
+         "between lines 54 and 61");
+      }();
+   });
+   var Scale = F2(function (a,b) {
+      return {ctor: "Scale"
+             ,_0: a
+             ,_1: b};
+   });
+   var musicalScales = _L.fromArray([A2(Scale,
+                                    "Major",
+                                    _L.fromArray([0,2,2,1,2,2,2,1]))
+                                    ,A2(Scale,
+                                    "Minor",
+                                    _L.fromArray([0
+                                                 ,2
+                                                 ,1
+                                                 ,2
+                                                 ,2
+                                                 ,1
+                                                 ,2
+                                                 ,2]))]);
+   var getScaleLabel = function (_v4) {
+      return function () {
+         switch (_v4.ctor)
+         {case "Scale": return _v4._0;}
+         _E.Case($moduleName,
+         "on line 37, column 33 to 38");
+      }();
+   };
+   var getScaleSteps = function (_v8) {
+      return function () {
+         switch (_v8.ctor)
+         {case "Scale": return _v8._1;}
+         _E.Case($moduleName,
+         "on line 38, column 33 to 38");
+      }();
+   };
+   var Tonic = F2(function (a,b) {
+      return {ctor: "Tonic"
+             ,_0: a
+             ,_1: b};
+   });
+   var tonics = _L.fromArray([A2(Tonic,
+                             "A",
+                             0)
+                             ,A2(Tonic,"A#/Bb",1)
+                             ,A2(Tonic,"B",2)
+                             ,A2(Tonic,"C",3)
+                             ,A2(Tonic,"C#/Db",4)
+                             ,A2(Tonic,"D",5)
+                             ,A2(Tonic,"D#/Eb",6)
+                             ,A2(Tonic,"E",7)
+                             ,A2(Tonic,"F",8)
+                             ,A2(Tonic,"F#/Gb",9)
+                             ,A2(Tonic,"G",10)
+                             ,A2(Tonic,"G#/Ab",11)]);
+   var visualModel = {_: {}
+                     ,scale: List.head(musicalScales)
+                     ,tonic: List.head(tonics)};
+   var tonicInput = Graphics.Input.input(visualModel.tonic);
+   var scaleInput = Graphics.Input.input(visualModel.scale);
+   var visualSignal = A3(Signal.lift2,
+   F2(function (t,s) {
+      return {_: {}
+             ,scale: s
+             ,tonic: t};
+   }),
+   tonicInput.signal,
+   scaleInput.signal);
+   var scaleBoxes = function (scale) {
+      return function () {
+         var box = function (s) {
+            return A4(checkboxWithLabel,
+            getScaleLabel(s),
+            scaleInput.handle,
+            function (_v12) {
+               return function () {
+                  return s;
+               }();
+            },
+            _U.eq(s,scale));
+         };
+         return Graphics.Element.flow(Graphics.Element.right)(A2(List.map,
+         box,
+         musicalScales));
+      }();
+   };
+   var playInput = Graphics.Input.input(visualModel);
+   var musicSignal = A4(Signal.lift3,
+   F3(function (v0,v1,v2) {
+      return {ctor: "_Tuple3"
+             ,_0: v0
+             ,_1: v1
+             ,_2: v2};
+   }),
+   playInput.signal,
+   Signal.count(playInput.signal),
+   Time.every(350.0));
+   var playButton = F2(function (vmodel,
+   mmodel) {
+      return A3(Graphics.Input.button,
+      playInput.handle,
+      vmodel,
+      isPlaying(mmodel.state) ? "Stop" : "Play");
+   });
+   var getTonicLabel = function (_v14) {
+      return function () {
+         switch (_v14.ctor)
+         {case "Tonic": return _v14._0;}
+         _E.Case($moduleName,
+         "on line 34, column 33 to 38");
+      }();
+   };
+   var tonicBoxes = function (tonic) {
+      return function () {
+         var box = function (t) {
+            return A4(checkboxWithLabel,
+            getTonicLabel(t),
+            tonicInput.handle,
+            function (_v18) {
+               return function () {
+                  return t;
+               }();
+            },
+            _U.eq(t,tonic));
+         };
+         return Graphics.Element.flow(Graphics.Element.right)(A2(List.map,
+         box,
+         tonics));
+      }();
+   };
+   var render = function (_v20) {
+      return function () {
+         switch (_v20.ctor)
+         {case "_Tuple2":
+            return A2(Graphics.Element.flow,
+              Graphics.Element.down,
+              _L.fromArray([tonicBoxes(_v20._0.tonic)
+                           ,scaleBoxes(_v20._0.scale)
+                           ,A2(playButton,
+                           _v20._0,
+                           _v20._1)]));}
+         _E.Case($moduleName,
+         "between lines 107 and 110");
+      }();
+   };
+   var getTonicHalfStep = function (_v24) {
+      return function () {
+         switch (_v24.ctor)
+         {case "Tonic": return _v24._1;}
+         _E.Case($moduleName,
+         "on line 35, column 39 to 47");
+      }();
+   };
+   var startMusic = F2(function (_v28,
+   t) {
+      return function () {
+         return function () {
+            var node = WebAudio.startOscillator(0.0)(A3(WebAudio.connectNodes,
+            WebAudio.getDestinationNode(WebAudio.DefaultContext),
+            0,
+            0)(A2(WebAudio.createOscillatorNode,
+            WebAudio.DefaultContext,
+            WebAudio.Sine)));
+            return A4(updateNote,
+            node,
+            getTonicHalfStep(_v28.tonic),
+            getScaleSteps(_v28.scale),
+            t);
+         }();
+      }();
+   });
+   var updateMusic = F2(function (_v30,
+   mmodel) {
+      return function () {
+         switch (_v30.ctor)
+         {case "_Tuple3":
+            return function () {
+                 var _v35 = mmodel.state;
+                 switch (_v35.ctor)
+                 {case "Paused":
+                    return !_U.eq(_v30._1,
+                      mmodel.buttonCount) ? {_: {}
+                                            ,buttonCount: _v30._1
+                                            ,changed: true
+                                            ,state: A2(startMusic,
+                                            _v30._0,
+                                            _v30._2)} : _U.replace([["changed"
+                                                                    ,false]],
+                      mmodel);
+                    case "Playing":
+                    return !_U.eq(_v30._1,
+                      mmodel.buttonCount) ? {_: {}
+                                            ,buttonCount: _v30._1
+                                            ,changed: true
+                                            ,state: stopMusic(_v35._0)} : function () {
+                         var newState = A4(updateNote,
+                         _v35._0,
+                         _v35._1,
+                         _v35._2,
+                         _v30._2);
+                         return {_: {}
+                                ,buttonCount: _v30._1
+                                ,changed: Basics.not(isPlaying(newState))
+                                ,state: newState};
+                      }();}
+                 _E.Case($moduleName,
+                 "between lines 69 and 77");
+              }();}
+         _E.Case($moduleName,
+         "between lines 69 and 77");
+      }();
+   });
+   var mainMusic = A2(Signal.keepIf,
+   function (m) {
+      return m.changed || isPlaying(m.state);
+   },
+   musicModel)(A3(Signal.foldp,
+   updateMusic,
+   musicModel,
+   musicSignal));
+   var main = A2(Signal._op["<~"],
+   render,
+   A3(Signal.lift2,
+   F2(function (v0,v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   }),
+   visualSignal,
+   mainMusic));
+   _elm.Main.values = {_op: _op
+                      ,tonics: tonics
+                      ,musicalScales: musicalScales
+                      ,visualModel: visualModel
+                      ,musicModel: musicModel
+                      ,getTonicLabel: getTonicLabel
+                      ,getTonicHalfStep: getTonicHalfStep
+                      ,getScaleLabel: getScaleLabel
+                      ,getScaleSteps: getScaleSteps
+                      ,isPlaying: isPlaying
+                      ,stopMusic: stopMusic
+                      ,updateNote: updateNote
+                      ,startMusic: startMusic
+                      ,updateMusic: updateMusic
+                      ,tonicInput: tonicInput
+                      ,scaleInput: scaleInput
+                      ,playInput: playInput
+                      ,musicSignal: musicSignal
+                      ,visualSignal: visualSignal
+                      ,checkboxWithLabel: checkboxWithLabel
+                      ,tonicBoxes: tonicBoxes
+                      ,scaleBoxes: scaleBoxes
+                      ,playButton: playButton
+                      ,render: render
+                      ,mainMusic: mainMusic
+                      ,main: main
+                      ,Tonic: Tonic
+                      ,Scale: Scale
+                      ,Playing: Playing
+                      ,Paused: Paused};
+   return _elm.Main.values;
+};Elm.WebAudio = Elm.WebAudio || {};
+Elm.WebAudio.make = function (_elm) {
+   "use strict";
+   _elm.WebAudio = _elm.WebAudio || {};
+   if (_elm.WebAudio.values)
+   return _elm.WebAudio.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "WebAudio";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Native = Native || {};
+   Native.WebAudio = Elm.Native.WebAudio.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var setVelocity = Native.WebAudio.setVelocity;
+   var setOrientation = Native.WebAudio.setOrientation;
+   var setPosition = Native.WebAudio.setPosition;
+   var setConeOuterGain = Native.WebAudio.setConeOuterGain;
+   var getConeOuterGain = Native.WebAudio.getConeOuterGain;
+   var setConeOuterAngle = Native.WebAudio.setConeOuterAngle;
+   var getConeOuterAngle = Native.WebAudio.getConeOuterAngle;
+   var setConeInnerAngle = Native.WebAudio.setConeInnerAngle;
+   var getConeInnerAngle = Native.WebAudio.getConeInnerAngle;
+   var setRolloffFactor = Native.WebAudio.setRolloffFactor;
+   var getRolloffFactor = Native.WebAudio.getRolloffFactor;
+   var setMaxDistance = Native.WebAudio.setMaxDistance;
+   var getMaxDistance = Native.WebAudio.getMaxDistance;
+   var setReferenceDistance = Native.WebAudio.setReferenceDistance;
+   var getReferenceDistance = Native.WebAudio.getReferenceDistance;
+   var setDistanceModel = Native.WebAudio.setDistanceModel;
+   var getDistanceModel = Native.WebAudio.getDistanceModel;
+   var setPanningModel = Native.WebAudio.setPanningModel;
+   var getPanningModel = Native.WebAudio.getPanningModel;
+   var createPannerNode = Native.WebAudio.createPannerNode;
+   var Exponential = {ctor: "Exponential"};
+   var Inverse = {ctor: "Inverse"};
+   var Linear = {ctor: "Linear"};
+   var HRTF = {ctor: "HRTF"};
+   var EqualPower = {ctor: "EqualPower"};
+   var stopOscillator = Native.WebAudio.stopOscillator;
+   var startOscillator = Native.WebAudio.startOscillator;
+   var setOscillatorWaveType = Native.WebAudio.setOscillatorWaveType;
+   var getOscillatorWaveType = Native.WebAudio.getOscillatorWaveType;
+   var createOscillatorNode = Native.WebAudio.createOscillatorNode;
+   var Triangle = {ctor: "Triangle"};
+   var Sawtooth = {ctor: "Sawtooth"};
+   var Square = {ctor: "Square"};
+   var Sine = {ctor: "Sine"};
+   var createGainNode = Native.WebAudio.createGainNode;
+   var createDynamicsCompressorNode = Native.WebAudio.createDynamicsCompressorNode;
+   var createDelayNode = Native.WebAudio.createDelayNode;
+   var createChannelSplitterNode = Native.WebAudio.createChannelSplitterNode;
+   var createChannelMergerNode = Native.WebAudio.createChannelMergerNode;
+   var setFilterType = Native.WebAudio.setFilterType;
+   var getFilterType = Native.WebAudio.getFilterType;
+   var createBiquadFilterNode = Native.WebAudio.createBiquadFilterNode;
+   var AllPass = {ctor: "AllPass"};
+   var Notch = {ctor: "Notch"};
+   var Peaking = {ctor: "Peaking"};
+   var HighShelf = {ctor: "HighShelf"};
+   var LowShelf = {ctor: "LowShelf"};
+   var BandPass = {ctor: "BandPass"};
+   var HighPass = {ctor: "HighPass"};
+   var LowPass = {ctor: "LowPass"};
+   var getMaxChannelCount = Native.WebAudio.getMaxChannelCount;
+   var getDestinationNode = Native.WebAudio.getDestinationNode;
+   var setSmoothingConstant = Native.WebAudio.setSmoothingConstant;
+   var getSmoothingConstant = Native.WebAudio.getSmoothingConstant;
+   var setMinDecibels = Native.WebAudio.setMinDecibels;
+   var getMinDecibels = Native.WebAudio.getMinDecibels;
+   var setMaxDecibels = Native.WebAudio.setMaxDecibels;
+   var getMaxDecibels = Native.WebAudio.getMaxDecibels;
+   var setFFTSize = Native.WebAudio.setFFTSize;
+   var getFFTSize = Native.WebAudio.getFFTSize;
+   var createAnalyserNode = Native.WebAudio.createAnalyserNode;
+   var tapNode = F3(function (f,
+   t,
+   n) {
+      return function () {
+         var _ = t(f(n));
+         return n;
+      }();
+   });
+   var setChannelInterpretation = Native.WebAudio.setChannelInterpretation;
+   var getChannelInterpretation = Native.WebAudio.getChannelInterpretation;
+   var setChannelCountMode = Native.WebAudio.setChannelCountMode;
+   var getChannelCountMode = Native.WebAudio.getChannelCountMode;
+   var setChannelCount = Native.WebAudio.setChannelCount;
+   var getChannelCount = Native.WebAudio.getChannelCount;
+   var connectToParam = Native.WebAudio.connectToParam;
+   var connectNodes = Native.WebAudio.connectNodes;
+   var Discrete = {ctor: "Discrete"};
+   var Speakers = {ctor: "Speakers"};
+   var Explicit = {ctor: "Explicit"};
+   var ClampedMax = {ctor: "ClampedMax"};
+   var Max = {ctor: "Max"};
+   var AudioNode = F3(function (a,
+   b,
+   c) {
+      return _U.insert("outputs",
+      b,
+      _U.insert("inputs",a,c));
+   });
+   var cancelScheduledValues = Native.WebAudio.cancelScheduledValues;
+   var setValueCurveAtTime = Native.WebAudio.setValueCurveAtTime;
+   var setTargetAtTime = Native.WebAudio.setTargetAtTime;
+   var exponentialRampToValue = Native.WebAudio.exponentialRampToValue;
+   var linearRampToValue = Native.WebAudio.linearRampToValue;
+   var setValueAtTime = Native.WebAudio.setValueAtTime;
+   var setValue = Native.WebAudio.setValue;
+   var AudioParam = function (a) {
+      return {ctor: "AudioParam"
+             ,_0: a};
+   };
+   var getCurrentTime = Native.WebAudio.getCurrentTime;
+   var getSampleRate = Native.WebAudio.getSampleRate;
+   var createContext = Native.WebAudio.createContext;
+   var DefaultContext = {ctor: "DefaultContext"};
+   var AudioContext = {ctor: "AudioContext"};
+   _elm.WebAudio.values = {_op: _op
+                          ,createContext: createContext
+                          ,getSampleRate: getSampleRate
+                          ,getCurrentTime: getCurrentTime
+                          ,setValue: setValue
+                          ,setValueAtTime: setValueAtTime
+                          ,linearRampToValue: linearRampToValue
+                          ,exponentialRampToValue: exponentialRampToValue
+                          ,setTargetAtTime: setTargetAtTime
+                          ,setValueCurveAtTime: setValueCurveAtTime
+                          ,cancelScheduledValues: cancelScheduledValues
+                          ,connectNodes: connectNodes
+                          ,connectToParam: connectToParam
+                          ,getChannelCount: getChannelCount
+                          ,setChannelCount: setChannelCount
+                          ,getChannelCountMode: getChannelCountMode
+                          ,setChannelCountMode: setChannelCountMode
+                          ,getChannelInterpretation: getChannelInterpretation
+                          ,setChannelInterpretation: setChannelInterpretation
+                          ,tapNode: tapNode
+                          ,createAnalyserNode: createAnalyserNode
+                          ,getFFTSize: getFFTSize
+                          ,setFFTSize: setFFTSize
+                          ,getMaxDecibels: getMaxDecibels
+                          ,setMaxDecibels: setMaxDecibels
+                          ,getMinDecibels: getMinDecibels
+                          ,setMinDecibels: setMinDecibels
+                          ,getSmoothingConstant: getSmoothingConstant
+                          ,setSmoothingConstant: setSmoothingConstant
+                          ,getDestinationNode: getDestinationNode
+                          ,getMaxChannelCount: getMaxChannelCount
+                          ,createBiquadFilterNode: createBiquadFilterNode
+                          ,getFilterType: getFilterType
+                          ,setFilterType: setFilterType
+                          ,createChannelMergerNode: createChannelMergerNode
+                          ,createChannelSplitterNode: createChannelSplitterNode
+                          ,createDelayNode: createDelayNode
+                          ,createDynamicsCompressorNode: createDynamicsCompressorNode
+                          ,createGainNode: createGainNode
+                          ,createOscillatorNode: createOscillatorNode
+                          ,getOscillatorWaveType: getOscillatorWaveType
+                          ,setOscillatorWaveType: setOscillatorWaveType
+                          ,startOscillator: startOscillator
+                          ,stopOscillator: stopOscillator
+                          ,createPannerNode: createPannerNode
+                          ,getPanningModel: getPanningModel
+                          ,setPanningModel: setPanningModel
+                          ,getDistanceModel: getDistanceModel
+                          ,setDistanceModel: setDistanceModel
+                          ,getReferenceDistance: getReferenceDistance
+                          ,setReferenceDistance: setReferenceDistance
+                          ,getMaxDistance: getMaxDistance
+                          ,setMaxDistance: setMaxDistance
+                          ,getRolloffFactor: getRolloffFactor
+                          ,setRolloffFactor: setRolloffFactor
+                          ,getConeInnerAngle: getConeInnerAngle
+                          ,setConeInnerAngle: setConeInnerAngle
+                          ,getConeOuterAngle: getConeOuterAngle
+                          ,setConeOuterAngle: setConeOuterAngle
+                          ,getConeOuterGain: getConeOuterGain
+                          ,setConeOuterGain: setConeOuterGain
+                          ,setPosition: setPosition
+                          ,setOrientation: setOrientation
+                          ,setVelocity: setVelocity
+                          ,AudioContext: AudioContext
+                          ,DefaultContext: DefaultContext
+                          ,AudioParam: AudioParam
+                          ,Max: Max
+                          ,ClampedMax: ClampedMax
+                          ,Explicit: Explicit
+                          ,Speakers: Speakers
+                          ,Discrete: Discrete
+                          ,LowPass: LowPass
+                          ,HighPass: HighPass
+                          ,BandPass: BandPass
+                          ,LowShelf: LowShelf
+                          ,HighShelf: HighShelf
+                          ,Peaking: Peaking
+                          ,Notch: Notch
+                          ,AllPass: AllPass
+                          ,Sine: Sine
+                          ,Square: Square
+                          ,Sawtooth: Sawtooth
+                          ,Triangle: Triangle
+                          ,EqualPower: EqualPower
+                          ,HRTF: HRTF
+                          ,Linear: Linear
+                          ,Inverse: Inverse
+                          ,Exponential: Exponential
+                          ,AudioNode: AudioNode};
+   return _elm.WebAudio.values;
+};</script></head><body><script type="text/javascript">Elm.fullscreen(Elm.Main)</script><noscript></noscript></body></html>
