@@ -178,6 +178,21 @@ getChannelInterpretation = Native.WebAudio.getChannelInterpretation
 setChannelInterpretation : ChannelInterpretation -> AudioNode a -> AudioNode a
 setChannelInterpretation = Native.WebAudio.setChannelInterpretation
 
+{-| "Tap" a node
+
+This is a convenience function, making it easy to access one of the node's
+AudioParam properties and then return the node itself at the end so you can
+continue to chain more functions.
+
+For example, if "node" is an OscillatorNode:
+
+tapNode .frequency (\f -> setValue 440.0 f) node <| startOscillator 0.0
+-}
+tapNode : (a -> b) -> (b -> c) -> a -> a
+tapNode f t n =
+  let _ = t <| f n
+  in n
+
 
 
 {-| Type of an AnalyserNode -}

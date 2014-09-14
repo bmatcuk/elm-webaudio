@@ -1,2 +1,5 @@
 build/
 cache/
+*.elmi
+*.elmo
+*.swp

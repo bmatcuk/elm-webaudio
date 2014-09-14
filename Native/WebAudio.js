@@ -34,37 +34,37 @@ Elm.Native.WebAudio.make = function(elm) {
 
   /* AudioParam */
   values.setValue = F2(function(val, param) {
-    param._node[param._0].value = val;
+    param._node._node[param._0].value = val;
     return param;
   });
 
   values.setValueAtTime = F3(function(value, time, param) {
-    param._node[param._0].setValueAtTime(value, time);
+    param._node._node[param._0].setValueAtTime(value, time);
     return param;
   });
 
   values.linearRampToValue = F3(function(value, time, param) {
-    param._node[param._0].linearRampToValueAtTime(value, time);
+    param._node._node[param._0].linearRampToValueAtTime(value, time);
     return param;
   });
 
   values.exponentialRampToValue = F3(function(value, time, param) {
-    param._node[param._0].exponentialRampToValueAtTime(value, time);
+    param._node._node[param._0].exponentialRampToValueAtTime(value, time);
     return param;
   });
 
   values.setTargetAtTime = F4(function(target, starttime, constant, param) {
-    param._node[param._0].setTargetAtTime(target, starttime, constant);
+    param._node._node[param._0].setTargetAtTime(target, starttime, constant);
     return param;
   });
 
   values.setValueCurveAtTime = F4(function(curve, starttime, duration, param) {
-    param._node[param._0].setValueCurveAtTime(toArray(curve), starttime, duration);
+    param._node._node[param._0].setValueCurveAtTime(toArray(curve), starttime, duration);
     return param;
   });
 
   values.cancelScheduledValues = F2(function(time, param) {
-    param._node[param._0].cancelScheduledValues(time);
+    param._node._node[param._0].cancelScheduledValues(time);
     return param;
   });
 
