@@ -4,18 +4,147 @@ module WebAudio where
 
 # Getting Started
 
-First, you will need an AudioContext. In most cases, a single context is all
-you'll need. In this case, you can use the "DefaultContext". If, for some
-reason, you need more than one context, you can use the "createContext"
+First, you will need an `AudioContext`. In most cases, a single context is all
+you'll need. In this case, you can use the `DefaultContext`. If, for some
+reason, you need more than one context, you can use the `createContext`
 function to create a context.
 
-@docs AudioContext a, createContext
+I highly recommend you read through the Web Audio API documentation to
+familiarize yourself with the concepts. You can find the documentation here:
+http://webaudio.github.io/web-audio-api/
+
+@docs AudioContext, createContext, getSampleRate, getCurrentTime
 
 # Special Notes
 
 Most "set" functions take the object whose value is being set as the last
 parameter, and then the function returns that same object to facilitate
 function chaining using the "|>" operator.
+
+# Audio Params
+
+Most parameters for various Audio Nodes are actually "AudioParams". These
+allow you to either set a constant value, or schedule changes to the value at
+appropriate times. All times are relative to the AudioContext's current time.
+If you try to schedule a change for a time that has already passed, the change
+will take effect immediately.
+
+The documentation below will note if the node has any AudioParams that you can
+modify in the form of a bulleted list. These params can be accessed using the
+record notation. For example, a Biquad Filter Node has a "frequency" param. It
+could be accessed with: `node.frequency`
+
+@docs AudioParam, setValue, setValueAtTime, linearRampToValue, exponentialRampToValue, setTargetAtTime, setValueCurveAtTime, cancelScheduledValues
+
+# Audio Nodes
+
+Once you have your AudioContext, you can begin to build your graph of Audio
+Nodes.
+
+@docs AudioNode, ChannelCountMode, ChannelInterpretation, connectNodes, connectToParam, getChannelCount, setChannelCount, getChannelCountMode, setChannelCountMode, getChannelInterpretation, setChannelInterpretation, tapNode
+
+# Analyser Nodes
+
+@docs AnalyserNode, createAnalyserNode, getFFTSize, setFFTSize, getMaxDecibels, setMaxDecibels, getMinDecibels, setMinDecibels, getSmoothingConstant, setSmoothingConstant
+
+# Audio Buffer Source Nodes
+
+These nodes are currently unimplemented.
+
+# Audio Destination Nodes
+
+Each Audio Context has only one Audio Destination Node.
+
+@docs AudioDestinationNode, getDestinationNode, getMaxChannelCount
+
+# Audio Worker Node
+
+These nodes are currently unimplemented.
+
+# Biquad Filter Nodes
+
+Biquad Filter Nodes have the following AudioParams:
+
+* frequency
+* detune
+* q
+* gain
+
+@docs BiquadFilterNode, BiquadFilterType, createBiquadFilterNode, getFilterType, setFilterType
+
+# Channel Merger Nodes
+
+@docs ChannelMergerNode, createChannelMergerNode
+
+# Channel Splitter Nodes
+
+@docs ChannelSplitterNode, createChannelSplitterNode
+
+# Convolver Nodes
+
+These nodes are currently unimplemented.
+
+# Delay Nodes
+
+Delay Nodes have the following AudioParams:
+
+* delayTime
+
+@docs DelayNode, createDelayNode
+
+# Dynamics Compressor Nodes
+
+Dynamics Compressor Nodes have the following AudioParams:
+
+* threshold
+* knee
+* ratio
+* reduction
+* attack
+* release
+
+@docs DynamicsCompressorNode, createDynamicsCompressorNode
+
+# Gain Nodes
+
+Gain Nodes have the following AudioParams:
+
+* gain
+
+@docs GainNode, createGainNode
+
+# Media Element Audio Source Nodes
+
+These nodes are currently unimplemented.
+
+# Media Stream Audio Destination Nodes
+
+These nodes are currently unimplemented.
+
+# Media Stream Audio Source Nodes
+
+These nodes are currently unimplemented.
+
+# Oscillator Nodes
+
+Oscillator Nodes have the following AudioParams:
+
+* frequency
+* detune
+
+@docs OscillatorNode, OscillatorWaveType, createOscillatorNode, getOscillatorWaveType, setOscillatorWaveType, startOscillator, stopOscillator
+
+# Panner Nodes
+
+@docs PannerNode, PanningModel, DistanceModel, createPannerNode, getPanningModel, setPanningModel, getDistanceModel, setDistanceModel, getReferenceDistance, setReferenceDistance, getMaxDistance, setMaxDistance, getRolloffFactor, setRolloffFactor, getConeInnerAngle, setConeInnerAngle, getConeOuterAngle, setConeOuterAngle, getConeOuterGain, setConeOuterGain, setPosition, setOrientation, setVelocity
+
+# Script Processor Nodes
+
+These nodes are currently unimplemented.
+
+# Wave Shaper Nodes
+
+These nodes are currently unimplemented.
 
 -}
 
@@ -25,14 +154,14 @@ import Native.WebAudio
 
 {-| The AudioContext
 
-Think of the DefaultContext as a global singleton. Just use the DefaultContext
+Think of the `DefaultContext` as a global singleton. Just use the `DefaultContext`
 unless there's some reason you need to have more than one context.
 -}
 data AudioContext = AudioContext | DefaultContext
 
 {-| Create a new AudioContext
 
-Instead of creating a context, you can use the "DefaultContext". This will be
+Instead of creating a context, you can use the `DefaultContext`. This will be
 sufficient for most people.
 -}
 createContext : () -> AudioContext
@@ -186,7 +315,9 @@ continue to chain more functions.
 
 For example, if "node" is an OscillatorNode:
 
-tapNode .frequency (\f -> setValue 440.0 f) node <| startOscillator 0.0
+```haskell
+tapNode .frequency (\f -> setValue 440.0 f) node |> startOscillator 0.0
+```
 -}
 tapNode : (a -> b) -> (b -> c) -> a -> a
 tapNode f t n =
@@ -394,17 +525,19 @@ This method returns the oscillator for chaining.
 startOscillator : Float -> OscillatorNode -> OscillatorNode
 startOscillator = Native.WebAudio.startOscillator
 
-{-| Schedule a stop time for the Oscillator. After an end time has been set,
-the oscillator can no longer be started. Since an oscillator can no longer
-be started after it has been stopped, the oscillator is essentially useless.
-The system is supposed to automatically clean up AudioNodes that are no
-longer in use, provided that the node meets a couple requirements - one of
-which is that there are no more references to it. Therefore, Elm.WebAudio
-will automatically free the reference to the underlying javascript object as
-soon as a stop has been scheduled. What this means, from a practical
-standpoint, is that any further attempt to manipulate the Oscillator will
-result in a javascript error. It's not pretty, but, honestly, neither is the
-WebAudio Javascript API.
+{-| Schedule a stop time for the Oscillator.
+
+WARNING:
+After an end time has been set, the oscillator can no longer be started. Since
+an oscillator can no longer be started after it has been stopped, the
+oscillator is essentially useless. The system is supposed to automatically clean
+up AudioNodes that are no longer in use, provided that the node meets a couple
+requirements - one of which is that there are no more references to it.
+Therefore, Elm.WebAudio will automatically free the reference to the underlying
+javascript object as soon as a stop has been scheduled. What this means, from a
+practical standpoint, is that any further attempt to manipulate the Oscillator
+will result in a javascript error. It's not pretty, but, honestly, neither is
+the WebAudio Javascript API.
 -}
 stopOscillator : Float -> OscillatorNode -> ()
 stopOscillator = Native.WebAudio.stopOscillator
