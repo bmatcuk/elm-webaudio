@@ -38,6 +38,10 @@ Elm.Native.WebAudio.make = function(elm) {
     return param;
   });
 
+  values.getValue = function(param) {
+    return param._node._node[param._0].value;
+  };
+
   values.setValueAtTime = F3(function(value, time, param) {
     param._node._node[param._0].setValueAtTime(value, time);
     return param;
@@ -303,6 +307,50 @@ Elm.Native.WebAudio.make = function(elm) {
     var ret = buildAudioNode(node);
     buildAudioParam('gain', 'gain', ret);
     return ret;
+  };
+
+
+
+  /* MediaElementAudioSourceNode */
+  values.createHiddenMediaElementAudioSourceNode = function(context) {
+    var element = new Audio();
+    return A2(values.createMediaElementAudioSourceNode, context, element);
+  };
+
+  values.createMediaElementAudioSourceNode = F2(function(context, element) {
+    var node = extractContext(context).createMediaElementSource(element);
+    var ret = buildAudioNode(node);
+    ret._element = element;
+    return ret;
+  });
+
+  values.getMediaElementIsLooping = function(node) {
+    return node._element.loop;
+  };
+
+  values.setMediaElementIsLooping = F2(function(loop, node) {
+    node._element.loop = loop;
+    return node;
+  });
+
+  values.getMediaElementSource = function(node) {
+    return node._element.src;
+  };
+
+  values.setMediaElementSource = F2(function(source, node) {
+    node._element.src = source;
+    node._element.load();
+    return node;
+  });
+
+  values.playMediaElement = function(node) {
+    node._element.play();
+    return node;
+  };
+
+  values.pauseMediaElement = function(node) {
+    node._element.pause();
+    return node;
   };
 
 

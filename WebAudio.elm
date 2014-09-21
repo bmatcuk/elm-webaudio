@@ -34,7 +34,7 @@ modify in the form of a bulleted list. These params can be accessed using the
 record notation. For example, a Biquad Filter Node has a "frequency" param. It
 could be accessed with: `node.frequency`
 
-@docs AudioParam, setValue, setValueAtTime, linearRampToValue, exponentialRampToValue, setTargetAtTime, setValueCurveAtTime, cancelScheduledValues
+@docs AudioParam, setValue, getValue, setValueAtTime, linearRampToValue, exponentialRampToValue, setTargetAtTime, setValueCurveAtTime, cancelScheduledValues
 
 # Audio Nodes
 
@@ -115,7 +115,22 @@ Gain Nodes have the following AudioParams:
 
 # Media Element Audio Source Nodes
 
-These nodes are currently unimplemented.
+Media Element Audio Source Nodes connect HTMLMediaElements to the audio graph.
+This is the preferred way to connect a "long" audio file to the audio graph.
+HTMLMediaElements are things like the HTML video or audio tags, and creating
+these tags is a bit beyond the scope of this library. However, this library
+does have a couple convenience methods for creating a "hidden" audio tag. This
+tag will be appended to the end of the document body and will be set to have no
+controls.
+
+The Native library also includes a function called `createMediaElementSourceNode`
+that takes an instance of HTMLMediaElement (which you might get from doing a
+`document.getElementById()` or from creating an element with `document.createElement`)
+and returns a MediaElementAudioSourceNode. You could use this in your own code
+to create a MediaElementAudioSourceNode from an audio (or video) tag that you
+have created using other means.
+
+@docs MediaElementAudioSourceNode, createHiddenMediaElementAudioSourceNode, getMediaElementIsLooping, setMediaElementIsLooping, getMediaElementSource, setMediaElementSource, playMediaElement, pauseMediaElement
 
 # Media Stream Audio Destination Nodes
 
@@ -187,6 +202,10 @@ data AudioParam = AudioParam String
 {-| Set the static value of the param -}
 setValue : Float -> AudioParam -> AudioParam
 setValue = Native.WebAudio.setValue
+
+{-| Get the current value of the param -}
+getValue : AudioParam -> Float
+getValue = Native.WebAudio.getValue
 
 {-| Schedule the AudioParam to change values at a specific time -}
 setValueAtTime : Float -> Float -> AudioParam -> AudioParam
@@ -485,7 +504,41 @@ type GainNode = AudioNode { gain:AudioParam }
 createGainNode : AudioContext -> GainNode
 createGainNode = Native.WebAudio.createGainNode
 
-{-| TODO: Type of a MediaElementAudioSourceNode -}
+
+
+{-| Type of a MediaElementAudioSourceNode -}
+type MediaElementAudioSourceNode = AudioNode {}
+
+{-| Create a MediaElementAudioSourceNode using a hidden audio tag -}
+createHiddenMediaElementAudioSourceNode : AudioContext -> MediaElementAudioSourceNode
+createHiddenMediaElementAudioSourceNode = Native.WebAudio.createHiddenMediaElementAudioSourceNode
+
+{-| Get whether or not the MediaElementAudioSourceNode should loop -}
+getMediaElementIsLooping : MediaElementAudioSourceNode -> Bool
+getMediaElementIsLooping = Native.WebAudio.getMediaElementIsLooping
+
+{-| Set whether or not the MediaElementAudioSourceNode should loop -}
+setMediaElementIsLooping : Bool -> MediaElementAudioSourceNode -> MediaElementAudioSourceNode
+setMediaElementIsLooping = Native.WebAudio.setMediaElementIsLooping
+
+{-| Get the source of the MediaElementAudioSourceNode -}
+getMediaElementSource : MediaElementAudioSourceNode -> String
+getMediaElementSource = Native.WebAudio.getMediaElementSource
+
+{-| Set the source of the MediaElementAudioSourceNode -}
+setMediaElementSource : String -> MediaElementAudioSourceNode -> MediaElementAudioSourceNode
+setMediaElementSource = Native.WebAudio.setMediaElementSource
+
+{-| Play the MediaElementAudioSourceNode -}
+playMediaElement : MediaElementAudioSourceNode -> MediaElementAudioSourceNode
+playMediaElement = Native.WebAudio.playMediaElement
+
+{-| Pause the MediaElementAudioSourceNode -}
+pauseMediaElement : MediaElementAudioSourceNode -> MediaElementAudioSourceNode
+pauseMediaElement = Native.WebAudio.pauseMediaElement
+
+
+
 {-| TODO: Type of a MediaStreamAudioDestinationNode -}
 {-| TODO: Type of a MediaStreamAudioSourceNode -}
 
