@@ -4,7 +4,9 @@ Elm.Native.WebAudio.make = function(elm) {
   elm.Native.WebAudio = elm.Native.WebAudio || {};
   if (elm.Native.WebAudio.values) return elm.Native.WebAudio.values;
 
-  var toArray = Elm.Native.List.make(elm).toArray;
+  var List = Elm.Native.List.make(elm);
+  var toArray = List.toArray;
+  var fromArray = List.fromArray;
 
 
 
@@ -37,6 +39,10 @@ Elm.Native.WebAudio.make = function(elm) {
     param._node._node[param._0].value = val;
     return param;
   });
+
+  values.getValue = function(param) {
+    return param._node._node[param._0].value;
+  };
 
   values.setValueAtTime = F3(function(value, time, param) {
     param._node._node[param._0].setValueAtTime(value, time);
@@ -172,6 +178,34 @@ Elm.Native.WebAudio.make = function(elm) {
   buildProperty('MinDecibels', 'minDecibels');
   buildProperty('SmoothingConstant', 'smoothingTimeConstant');
 
+  values.getByteFrequencyData = function(node) {
+    if (!node._bFreq || node._bFreq.length != node._node.frequencyBinCount)
+      node._bFreq = new Uint8Array(node._node.frequencyBinCount);
+    node._node.getByteFrequencyData(node._bFreq);
+    return fromArray(node._bFreq);
+  };
+
+  values.getByteTimeDomainData = function(node) {
+    if (!node._bTime || node._bTime.length != node._node.fftSize)
+      node._bTime = new Uint8Array(node._node.fftSize);
+    node._node.getByteTimeDomainData(node._bTime);
+    return fromArray(node._bTime);
+  };
+
+  values.getFloatFrequencyData = function(node) {
+    if (!node._fFreq || node._fFreq.length != node._node.frequencyBinCount)
+      node._fFreq = new Float32Array(node._node.frequencyBinCount);
+    node._node.getFloatFrequencyData(node._fFreq);
+    return fromArray(node._fFreq);
+  };
+
+  values.getFloatTimeDomainData = function(node) {
+    if (!node._fTime || node._fTime.length != node._node.fftSize)
+      node._fTime = new Float32Array(node._node.fftSize);
+    node._node.getFloatTimeDomainData(node._fTime);
+    return fromArray(node._fTime);
+  };
+
 
 
   /* TODO: Audio Buffer Source Node */
@@ -303,6 +337,50 @@ Elm.Native.WebAudio.make = function(elm) {
     var ret = buildAudioNode(node);
     buildAudioParam('gain', 'gain', ret);
     return ret;
+  };
+
+
+
+  /* MediaElementAudioSourceNode */
+  values.createHiddenMediaElementAudioSourceNode = function(context) {
+    var element = new Audio();
+    return A2(values.createMediaElementAudioSourceNode, context, element);
+  };
+
+  values.createMediaElementAudioSourceNode = F2(function(context, element) {
+    var node = extractContext(context).createMediaElementSource(element);
+    var ret = buildAudioNode(node);
+    ret._element = element;
+    return ret;
+  });
+
+  values.getMediaElementIsLooping = function(node) {
+    return node._element.loop;
+  };
+
+  values.setMediaElementIsLooping = F2(function(loop, node) {
+    node._element.loop = loop;
+    return node;
+  });
+
+  values.getMediaElementSource = function(node) {
+    return node._element.src;
+  };
+
+  values.setMediaElementSource = F2(function(source, node) {
+    node._element.src = source;
+    node._element.load();
+    return node;
+  });
+
+  values.playMediaElement = function(node) {
+    node._element.play();
+    return node;
+  };
+
+  values.pauseMediaElement = function(node) {
+    node._element.pause();
+    return node;
   };
 
 

@@ -425,6 +425,13 @@ Elm.WebAudio.make = function (_elm) {
    var Sawtooth = {ctor: "Sawtooth"};
    var Square = {ctor: "Square"};
    var Sine = {ctor: "Sine"};
+   var pauseMediaElement = Native.WebAudio.pauseMediaElement;
+   var playMediaElement = Native.WebAudio.playMediaElement;
+   var setMediaElementSource = Native.WebAudio.setMediaElementSource;
+   var getMediaElementSource = Native.WebAudio.getMediaElementSource;
+   var setMediaElementIsLooping = Native.WebAudio.setMediaElementIsLooping;
+   var getMediaElementIsLooping = Native.WebAudio.getMediaElementIsLooping;
+   var createHiddenMediaElementAudioSourceNode = Native.WebAudio.createHiddenMediaElementAudioSourceNode;
    var createGainNode = Native.WebAudio.createGainNode;
    var createDynamicsCompressorNode = Native.WebAudio.createDynamicsCompressorNode;
    var createDelayNode = Native.WebAudio.createDelayNode;
@@ -443,6 +450,10 @@ Elm.WebAudio.make = function (_elm) {
    var LowPass = {ctor: "LowPass"};
    var getMaxChannelCount = Native.WebAudio.getMaxChannelCount;
    var getDestinationNode = Native.WebAudio.getDestinationNode;
+   var getFloatTimeDomainData = Native.WebAudio.getFloatTimeDomainData;
+   var getFloatFrequencyData = Native.WebAudio.getFloatFrequencyData;
+   var getByteTimeDomainData = Native.WebAudio.getByteTimeDomainData;
+   var getByteFrequencyData = Native.WebAudio.getByteFrequencyData;
    var setSmoothingConstant = Native.WebAudio.setSmoothingConstant;
    var getSmoothingConstant = Native.WebAudio.getSmoothingConstant;
    var setMinDecibels = Native.WebAudio.setMinDecibels;
@@ -486,6 +497,7 @@ Elm.WebAudio.make = function (_elm) {
    var exponentialRampToValue = Native.WebAudio.exponentialRampToValue;
    var linearRampToValue = Native.WebAudio.linearRampToValue;
    var setValueAtTime = Native.WebAudio.setValueAtTime;
+   var getValue = Native.WebAudio.getValue;
    var setValue = Native.WebAudio.setValue;
    var AudioParam = function (a) {
       return {ctor: "AudioParam"
@@ -501,6 +513,7 @@ Elm.WebAudio.make = function (_elm) {
                           ,getSampleRate: getSampleRate
                           ,getCurrentTime: getCurrentTime
                           ,setValue: setValue
+                          ,getValue: getValue
                           ,setValueAtTime: setValueAtTime
                           ,linearRampToValue: linearRampToValue
                           ,exponentialRampToValue: exponentialRampToValue
@@ -525,6 +538,10 @@ Elm.WebAudio.make = function (_elm) {
                           ,setMinDecibels: setMinDecibels
                           ,getSmoothingConstant: getSmoothingConstant
                           ,setSmoothingConstant: setSmoothingConstant
+                          ,getByteFrequencyData: getByteFrequencyData
+                          ,getByteTimeDomainData: getByteTimeDomainData
+                          ,getFloatFrequencyData: getFloatFrequencyData
+                          ,getFloatTimeDomainData: getFloatTimeDomainData
                           ,getDestinationNode: getDestinationNode
                           ,getMaxChannelCount: getMaxChannelCount
                           ,createBiquadFilterNode: createBiquadFilterNode
@@ -535,6 +552,13 @@ Elm.WebAudio.make = function (_elm) {
                           ,createDelayNode: createDelayNode
                           ,createDynamicsCompressorNode: createDynamicsCompressorNode
                           ,createGainNode: createGainNode
+                          ,createHiddenMediaElementAudioSourceNode: createHiddenMediaElementAudioSourceNode
+                          ,getMediaElementIsLooping: getMediaElementIsLooping
+                          ,setMediaElementIsLooping: setMediaElementIsLooping
+                          ,getMediaElementSource: getMediaElementSource
+                          ,setMediaElementSource: setMediaElementSource
+                          ,playMediaElement: playMediaElement
+                          ,pauseMediaElement: pauseMediaElement
                           ,createOscillatorNode: createOscillatorNode
                           ,getOscillatorWaveType: getOscillatorWaveType
                           ,setOscillatorWaveType: setOscillatorWaveType
