@@ -1,4 +1,5 @@
 examples/release/
+examples/.soundcloudkey
 build/
 cache/
 *.elmi
