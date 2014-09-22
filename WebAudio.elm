@@ -45,7 +45,7 @@ Nodes.
 
 # Analyser Nodes
 
-@docs AnalyserNode, createAnalyserNode, getFFTSize, setFFTSize, getMaxDecibels, setMaxDecibels, getMinDecibels, setMinDecibels, getSmoothingConstant, setSmoothingConstant
+@docs AnalyserNode, createAnalyserNode, getFFTSize, setFFTSize, getMaxDecibels, setMaxDecibels, getMinDecibels, setMinDecibels, getSmoothingConstant, setSmoothingConstant, getByteFrequencyData, getByteTimeDomainData, getFloatFrequencyData, getFloatTimeDomainData
 
 # Audio Buffer Source Nodes
 
@@ -397,6 +397,38 @@ function returns the AnalyserNode for chaining.
 -}
 setSmoothingConstant : Float -> AnalyserNode -> AnalyserNode
 setSmoothingConstant = Native.WebAudio.setSmoothingConstant
+
+{-| Get frequency data from the AnalyserNode
+
+A value of 0 equals the minDecibels setting, and a value of 255 equals the
+maxDecibels setting.
+-}
+getByteFrequencyData : AnalyserNode -> [Int]
+getByteFrequencyData = Native.WebAudio.getByteFrequencyData
+
+{-| Get time domain data from the AnalyserNode
+
+A value of 0 equals the minDecibels setting, and a value of 255 equals the
+maxDecibels setting.
+-}
+getByteTimeDomainData : AnalyserNode -> [Int]
+getByteTimeDomainData = Native.WebAudio.getByteTimeDomainData
+
+{-| Get frequency data from the AnalyserNode
+
+A value of 0 equals the minDecibels setting, and a value of 1 equals the
+maxDecibels setting.
+-}
+getFloatFrequencyData : AnalyserNode -> [Float]
+getFloatFrequencyData = Native.WebAudio.getFloatFrequencyData
+
+{-| Get time domain data from the AnalyserNode
+
+A value of 0 equals the minDecibels setting, and a value of 1 equals the
+maxDecibels setting.
+-}
+getFloatTimeDomainData : AnalyserNode -> [Float]
+getFloatTimeDomainData = Native.WebAudio.getFloatTimeDomainData
 
 
 

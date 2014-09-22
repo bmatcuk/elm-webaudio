@@ -4,7 +4,9 @@ Elm.Native.WebAudio.make = function(elm) {
   elm.Native.WebAudio = elm.Native.WebAudio || {};
   if (elm.Native.WebAudio.values) return elm.Native.WebAudio.values;
 
-  var toArray = Elm.Native.List.make(elm).toArray;
+  var List = Elm.Native.List.make(elm);
+  var toArray = List.toArray;
+  var fromArray = List.fromArray;
 
 
 
@@ -175,6 +177,34 @@ Elm.Native.WebAudio.make = function(elm) {
   buildProperty('MaxDecibels', 'maxDecibels');
   buildProperty('MinDecibels', 'minDecibels');
   buildProperty('SmoothingConstant', 'smoothingTimeConstant');
+
+  values.getByteFrequencyData = function(node) {
+    if (!node._bFreq || node._bFreq.length != node._node.frequencyBinCount)
+      node._bFreq = new Uint8Array(node._node.frequencyBinCount);
+    node._node.getByteFrequencyData(node._bFreq);
+    return fromArray(node._bFreq);
+  };
+
+  values.getByteTimeDomainData = function(node) {
+    if (!node._bTime || node._bTime.length != node._node.fftSize)
+      node._bTime = new Uint8Array(node._node.fftSize);
+    node._node.getByteTimeDomainData(node._bTime);
+    return fromArray(node._bTime);
+  };
+
+  values.getFloatFrequencyData = function(node) {
+    if (!node._fFreq || node._fFreq.length != node._node.frequencyBinCount)
+      node._fFreq = new Float32Array(node._node.frequencyBinCount);
+    node._node.getFloatFrequencyData(node._fFreq);
+    return fromArray(node._fFreq);
+  };
+
+  values.getFloatTimeDomainData = function(node) {
+    if (!node._fTime || node._fTime.length != node._node.fftSize)
+      node._fTime = new Float32Array(node._node.fftSize);
+    node._node.getFloatTimeDomainData(node._fTime);
+    return fromArray(node._fTime);
+  };
 
 
 
