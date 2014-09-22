@@ -416,16 +416,14 @@ getByteTimeDomainData = Native.WebAudio.getByteTimeDomainData
 
 {-| Get frequency data from the AnalyserNode
 
-A value of 0 equals the minDecibels setting, and a value of 1 equals the
-maxDecibels setting.
+Values are in the range of minDecibels to maxDecibels.
 -}
 getFloatFrequencyData : AnalyserNode -> [Float]
 getFloatFrequencyData = Native.WebAudio.getFloatFrequencyData
 
 {-| Get time domain data from the AnalyserNode
 
-A value of 0 equals the minDecibels setting, and a value of 1 equals the
-maxDecibels setting.
+Values are in the range of minDecibels to maxDecibels.
 -}
 getFloatTimeDomainData : AnalyserNode -> [Float]
 getFloatTimeDomainData = Native.WebAudio.getFloatTimeDomainData
