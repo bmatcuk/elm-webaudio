@@ -119,9 +119,9 @@ Media Element Audio Source Nodes connect HTMLMediaElements to the audio graph.
 This is the preferred way to connect a "long" audio file to the audio graph.
 HTMLMediaElements are things like the HTML video or audio tags, and creating
 these tags is a bit beyond the scope of this library. However, this library
-does have a couple convenience methods for creating a "hidden" audio tag. This
-tag will be appended to the end of the document body and will be set to have no
-controls.
+does have a convenience method for creating a "hidden" audio tag that will not
+be added to the page, but will load an audio file via the HTMLMediaElement
+interface thus gaining the benefits of streaming, etc.
 
 The Native library also includes a function called `createMediaElementSourceNode`
 that takes an instance of HTMLMediaElement (which you might get from doing a
@@ -155,7 +155,7 @@ Oscillator Nodes have the following AudioParams:
 
 # Script Processor Nodes
 
-These nodes are currently unimplemented.
+These nodes are deprecated and, thus, unimplemented. See: Audio Worker Nodes
 
 # Wave Shaper Nodes
 
