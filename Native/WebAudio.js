@@ -4,6 +4,8 @@ Elm.Native.WebAudio.make = function(elm) {
   elm.Native.WebAudio = elm.Native.WebAudio || {};
   if (elm.Native.WebAudio.values) return elm.Native.WebAudio.values;
 
+  var Maybe = Elm.Maybe.make(elm);
+  var Signal = Elm.Signal.make(elm);
   var List = Elm.Native.List.make(elm);
   var toArray = List.toArray;
   var fromArray = List.fromArray;
@@ -13,15 +15,23 @@ Elm.Native.WebAudio.make = function(elm) {
   var values = {};
 
   /* AudioContext */
-  values.createContext = function() {
+  function createStandardContext() {
     return new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  function createAudioContext(context) {
+    return {ctor: "AudioContext", _context: context};
+  }
+
+  values.createContext = function() {
+    return createAudioContext(createStandardContext());
   };
 
   var defaultContext = null;
   function extractContext(context) {
-    if (context.ctor === "AudioContext")
-      return context.context;
-    return defaultContext || (defaultContext = values.createContext());
+    if (context.ctor === "DefaultContext")
+      return defaultContext || (defaultContext = createStandardContext());
+    return context._context;
   }
 
   values.getSampleRate = function(context) {
@@ -30,6 +40,20 @@ Elm.Native.WebAudio.make = function(elm) {
 
   values.getCurrentTime = function(context) {
     return extractContext(context).currentTime;
+  };
+
+  values.createOfflineContext = F3(function(channels, length, sampleRate) {
+    var context = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(channels, length, sampleRate);
+    var signal = Signal.constant(Maybe.Nothing);
+    context.oncomplete = function(e) {
+      elm.notify(signal.id, Maybe.Just(values.createAudioBuffer(e.renderedBuffer)));
+    };
+    return {_:{}, _context: createAudioContext(context), _signal: signal};
+  });
+
+  values.startOfflineRendering = function(offlineContext) {
+    offlineContext._context._context.startRendering();
+    return offlineContext;
   };
 
 
@@ -72,6 +96,45 @@ Elm.Native.WebAudio.make = function(elm) {
   values.cancelScheduledValues = F2(function(time, param) {
     param._node._node[param._0].cancelScheduledValues(time);
     return param;
+  });
+
+
+
+  /* AudioBuffer */
+  values.createAudioBuffer = function(buffer) {
+    return {ctor: "AudioBuffer", _buffer: buffer};
+  };
+
+  values.getBufferSampleRate = function(buffer) {
+    return buffer._buffer.sampleRate;
+  };
+
+  values.getBufferLength = function(buffer) {
+    return buffer._buffer.length;
+  };
+
+  values.getBufferDuration = function(buffer) {
+    return buffer._buffer.duration;
+  };
+
+  values.getBufferNumberOfChannels = function(buffer) {
+    return buffer._buffer.numberOfChannels;
+  };
+
+  values.getChannelData = F2(function(channel, buffer) {
+    return fromArray(buffer._buffer.getChannelData(channel));
+  });
+
+  values.getChannelDataSlice = F4(function(channel, start, length, buffer) {
+    if (!buffer._slice || buffer._slice.length != length)
+      buffer._slice = new Float32Array(length);
+    buffer._buffer.copyFromChannel(buffer._slice, channel, start);
+    return fromArray(buffer._buffer);
+  });
+
+  values.setChannelDataSlice = F4(function(channel, start, data, buffer) {
+    buffer._buffer.copyToChannel(toArray(data), channel, start);
+    return buffer;
   });
 
 

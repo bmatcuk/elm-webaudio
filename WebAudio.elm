@@ -4,16 +4,18 @@ module WebAudio where
 
 # Getting Started
 
-First, you will need an `AudioContext`. In most cases, a single context is all
-you'll need. In this case, you can use the `DefaultContext`. If, for some
-reason, you need more than one context, you can use the `createContext`
-function to create a context.
+First, you will need an `AudioContext`. There are two types of contexts:
+a standard context (which outputs to the user's audio device - speakers,
+headphones, etc), and an "offline" context which renders audio to a buffer.
+It is fairly rare that you would need more than one standard context, and, so
+this library provides a convenience context called the `DefaultContext`. Think
+of the `DefaultContext` as a singleton for a standard context.
 
 I highly recommend you read through the Web Audio API documentation to
 familiarize yourself with the concepts. You can find the documentation here:
 http://webaudio.github.io/web-audio-api/
 
-@docs AudioContext, createContext, getSampleRate, getCurrentTime
+@docs AudioContext, createContext, createOfflineContext, getSampleRate, getCurrentTime
 
 # Special Notes
 
@@ -35,6 +37,24 @@ record notation. For example, a Biquad Filter Node has a "frequency" param. It
 could be accessed with: `node.frequency`
 
 @docs AudioParam, setValue, getValue, setValueAtTime, linearRampToValue, exponentialRampToValue, setTargetAtTime, setValueCurveAtTime, cancelScheduledValues
+
+# Audio Buffers
+
+An `AudioBuffer` stores audio data in memory in a PCM format with a range of
+-1 to 1. AudioBuffers may contain multiple channels. Typically, AudioBuffers
+are used for "short" audio clips (less than a minute) because the entire file
+must be loaded before the audio can be played. An HTMLMediaElement, such as
+the HTML `audio` tag handled by the MediaElementAudioSourceNode, is typically
+used for longer audio clips because it supports streaming.
+
+There are many ways to create AudioBuffers, some of which are beyond the scope
+of this library. However, this library does have a few functions available to
+load audio files into buffers. If you have a need to create an AudioBuffer in a
+way this library does not directly support, the Native library contains a
+function called `createAudioBuffer` that takes an AudioBuffer and returns an
+AudioBuffer compatible with this library.
+
+@docs AudioBuffer, getBufferSampleRate, getBufferLength, getBufferDuration, getBufferNumberOfChannels, getChannelData, getChannelDataSlice, setChannelDataSlice
 
 # Audio Nodes
 
@@ -176,7 +196,8 @@ data AudioContext = AudioContext | DefaultContext
 
 {-| Create a new AudioContext
 
-Instead of creating a context, you can use the `DefaultContext`. This will be
+Instead of creating a context, you can use the `DefaultContext`. The
+`DefaultContext` is like a singleton instance of an AudioContext and would be
 sufficient for most people.
 -}
 createContext : () -> AudioContext
@@ -189,6 +210,29 @@ getSampleRate = Native.WebAudio.getSampleRate
 {-| Get the context's current time -}
 getCurrentTime : AudioContext -> Float
 getCurrentTime = Native.WebAudio.getCurrentTime
+
+{-| The OfflineAudioContext -}
+type OfflineAudioContext = {context: AudioContext, signal: Signal Maybe AudioBuffer}
+
+{-| Create a new Offline AudioContext
+
+Parameters are: the number of channels, length of the buffer in sample frames,
+and the sample rate in Hz. Offline Audio Contexts return a record with two
+fields:
+
+* returnedValue.context is the AudioContext
+* returnedValue.signal is a signal that is raised when the Offline Audio
+  Context has finished rendering audio to the AudioBuffer
+-}
+createOfflineContext : Int -> Int -> Float -> OfflineAudioContext
+createOfflineContext = Native.WebAudio.createOfflineContext
+
+{-| Begin rendering audio in an Offline Audio Context
+
+When rendering has finished, the context.signal `Signal` will raise.
+-}
+startOfflineRendering : OfflineAudioContext -> OfflineAudioContext
+startOfflineRendering = Native.WebAudio.startOfflineRendering
 
 
 
@@ -239,6 +283,58 @@ setValueCurveAtTime = Native.WebAudio.setValueCurveAtTime
 {-| Cancel all scheduled changes at and after the specified time. -}
 cancelScheduledValues : Float -> AudioParam -> AudioParam
 cancelScheduledValues = Native.WebAudio.cancelScheduledValues
+
+
+
+{-| AudioBuffers
+
+-}
+data AudioBuffer = AudioBuffer
+
+{-| Retrieve the sample rate of the AudioBuffer -}
+getBufferSampleRate : AudioBuffer -> Float
+getBufferSampleRate = Native.WebAudio.getBufferSampleRate
+
+{-| Get the length of the AudioBuffer in sample frames -}
+getBufferLength : AudioBuffer -> Int
+getBufferLength = Native.WebAudio.getBufferLength
+
+{-| Get the duration of the AudioBuffer in seconds -}
+getBufferDuration : AudioBuffer -> Float
+getBufferDuration = Native.WebAudio.getBufferDuration
+
+{-| Retrieve the number of channels in the AudioBuffer -}
+getBufferNumberOfChannels : AudioBuffer -> Int
+getBufferNumberOfChannels = Native.WebAudio.getBufferNumberOfChannels
+
+{-| Get the buffer's data for the specified channel into an array -}
+getChannelData : Int -> AudioBuffer -> [Float]
+getChannelData = Native.WebAudio.getChannelData
+
+{-| Get a slice of channel data from the buffer.
+
+This is more efficient than getting all of the channel data if you only need
+a small chunk of it. Parameters are:
+
+* Channel number, starting with 0
+* What sample frame to start with
+* How many frames to return
+* The AudioBuffer
+-}
+getChannelDataSlice : Int -> Int -> Int -> AudioBuffer -> [Float]
+getChannelDataSlice = Native.WebAudio.getChannelDataSlice
+
+{-| Set a slice of channel data in the buffer.
+
+This method allows you to modify the channel data. Parameters are:
+
+* Channel number, starting with 0
+* The starting frame to modify
+* The new channel data
+* The AudioBuffer
+-}
+setChannelDataSlice : Int -> Int -> [Float] -> AudioBuffer -> AudioBuffer
+setChannelDataSlice = Native.WebAudio.setChannelDataSlice
 
 
 
