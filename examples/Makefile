@@ -3,6 +3,7 @@ TARGETS := $(addprefix build/,$(EXAMPLES:.elm=.html))
 RELEASE_TARGETS := $(addprefix release/,$(EXAMPLES:.elm=.html) elm-runtime.js WebAudio.js)
 
 INCLUDE_DIR := ..
+INCLUDE_FILES := $(wildcard $(INCLUDE_DIR)/*.elm)
 SCRIPTS := $(wildcard ../Native/*.js)
 
 .PHONY: all
@@ -11,12 +12,15 @@ all: $(TARGETS)
 .PHONY: release
 release: $(RELEASE_TARGETS)
 
+$(TARGETS): $(INCLUDE_FILES)
+$(RELEASE_TARGETS): $(INCLUDE_FILES)
+
 build/%.html: %.elm
-	elm -m $(addprefix --scripts=../,$(SCRIPTS)) --src-dir=$(INCLUDE_DIR) $?
+	elm -m $(addprefix --scripts=../,$(SCRIPTS)) --src-dir=$(INCLUDE_DIR) $<
 	@echo "** Open $@ in your browser"
 
 release/%.html: %.elm
-	elm -m --set-runtime=elm-runtime.js --scripts=WebAudio.js --src-dir=$(INCLUDE_DIR) --build-dir=release/ $?
+	elm -m --set-runtime=elm-runtime.js --scripts=WebAudio.js --src-dir=$(INCLUDE_DIR) --build-dir=release/ $<
 
 build/elm-runtime.js:
 	cp $(shell elm -g) build/
@@ -46,9 +50,9 @@ endif
 release/Visual.html: build/Visual.html release/Visual.js
 	cp build/Visual.html release/Visual.html
 
-build/Visual.js: Visual.elm
-	elm -m -o --src-dir=$(INCLUDE_DIR) $?
+build/Visual.js: Visual.elm $(INCLUDE_FILES)
+	elm -m -o --src-dir=$(INCLUDE_DIR) $<
 
-release/Visual.js: build/Visual.js
+release/Visual.js: build/Visual.js $(INCLUDE_FILES)
 	cp build/Visual.js release/Visual.js
 
