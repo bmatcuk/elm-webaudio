@@ -105,6 +105,20 @@ Elm.Native.WebAudio.make = function(elm) {
     return {ctor: "AudioBuffer", _buffer: buffer};
   };
 
+  values.loadAudioBufferFromUrl = F2(function(context, url) {
+    var signal = Signal.constant(Maybe.Nothing);
+    var request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.responseType = 'arraybuffer';
+    request.onload = function() {
+      extractContext(context).decodeAudioData(request.response, function(buffer) {
+        elm.notify(signal.id, Maybe.Just(values.createAudioBuffer(buffer)));
+      });
+    };
+    request.send();
+    return signal;
+  });
+
   values.getBufferSampleRate = function(buffer) {
     return buffer._buffer.sampleRate;
   };
@@ -271,7 +285,39 @@ Elm.Native.WebAudio.make = function(elm) {
 
 
 
-  /* TODO: Audio Buffer Source Node */
+  /* Audio Buffer Source Node */
+  values.createAudioBufferSourceNode = function(context) {
+    var node = extractContext(context).createBufferSource();
+    var ret = buildAudioNode(node);
+    buildAudioParam('playbackRate', 'playbackRate', ret);
+
+    var signal = Signal.constant(false);
+    ret._ended = signal;
+    node.onended = function() {
+      elm.notify(signal.id, true);
+    };
+
+    return ret;
+  };
+
+  buildGetter('AudioBufferFromNode', 'buffer');
+  buildSetter('AudioBufferForNode', 'buffer');
+  buildProperty('AudioBufferIsLooping', 'loop');
+  buildProperty('AudioBufferLoopStart', 'loopStart');
+  buildProperty('AudioBufferLoopEnd', 'loopEnd');
+
+  values.startAudioBufferNode = F4(function(when, offset, duration, node) {
+    if (Maybe.isNothing(duration))
+      node._node.start(when, offset);
+    else
+      node._node.start(when, offset, duration._0);
+    return node;
+  });
+
+  values.stopAudioBufferNode = F2(function(when, node) {
+    node._node.stop(when);
+    return node;
+  });
 
 
 

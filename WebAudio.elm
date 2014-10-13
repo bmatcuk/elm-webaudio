@@ -69,7 +69,7 @@ Nodes.
 
 # Audio Buffer Source Nodes
 
-These nodes are currently unimplemented.
+@docs AudioBufferSourceNode, createAudioBufferSourceNode, getAudioBufferFromNode, setAudioBufferForNode, getAudioBufferIsLooping, setAudioBufferIsLooping, getAudioBufferLoopStart, setAudioBufferLoopStart, getAudioBufferLoopEnd, setAudioBufferLoopEnd, startAudioBufferNode, stopAudioBufferNode
 
 # Audio Destination Nodes
 
@@ -286,10 +286,12 @@ cancelScheduledValues = Native.WebAudio.cancelScheduledValues
 
 
 
-{-| AudioBuffers
-
--}
+{-| AudioBuffers -}
 data AudioBuffer = AudioBuffer
+
+{-| Load an Audio Buffer from a URL -}
+loadAudioBufferFromUrl: AudioContext -> String -> Signal Maybe AudioBuffer
+loadAudioBufferFromUrl = Native.WebAudio.loadAudioBufferFromUrl
 
 {-| Retrieve the sample rate of the AudioBuffer -}
 getBufferSampleRate : AudioBuffer -> Float
@@ -526,7 +528,62 @@ getFloatTimeDomainData = Native.WebAudio.getFloatTimeDomainData
 
 
 
-{-| TODO: Type of an AudioBufferSourceNode -}
+{-| Type of an AudioBufferSourceNode -}
+type AudioBufferSourceNode = AudioNode { playbackRate:AudioParam, ended: Signal Bool }
+
+{-| Create an AudioBufferSourceNode -}
+createAudioBufferSourceNode : AudioContext -> AudioBufferSourceNode
+createAudioBufferSourceNode = Native.WebAudio.createAudioBufferSourceNode
+
+{-| Get the AudioBuffer associated with the AudioBufferSourceNode -}
+getAudioBufferFromNode : AudioBufferSourceNode -> AudioBuffer
+getAudioBufferFromNode = Native.WebAudio.getAudioBufferFromNode
+
+{-| Set the AudioBuffer associated with the AudioBufferSourceNode -}
+setAudioBufferForNode : AudioBuffer -> AudioBufferSourceNode -> AudioBufferSourceNode
+setAudioBufferForNode = Native.WebAudio.setAudioBufferForNode
+
+{-| Get whether or not the AudioBufferSourceNode is looping. -}
+getAudioBufferIsLooping : AudioBufferSourceNode -> Bool
+getAudioBufferIsLooping = Native.WebAudio.getAudioBufferIsLooping
+
+{-| Set whether or not the AudioBufferSourceNode should loop. -}
+setAudioBufferIsLooping : Bool -> AudioBufferSourceNode -> AudioBufferSourceNode
+setAudioBufferIsLooping = Native.WebAudio.setAudioBufferIsLooping
+
+{-| Get the starting point for looping in seconds. -}
+getAudioBufferLoopStart : AudioBufferSourceNode -> Float
+getAudioBufferLoopStart = Native.WebAudio.getAudioBufferLoopStart
+
+{-| Set the starting point for looping in seconds. -}
+setAudioBufferLoopStart : Float -> AudioBufferSourceNode -> AudioBufferSourceNode
+setAudioBufferLoopStart = Native.WebAudio.setAudioBufferLoopStart
+
+{-| Get the ending point for the looping in seconds. -}
+getAudioBufferLoopEnd : AudioBufferSourceNode -> Float
+getAudioBufferLoopEnd = Native.WebAudio.getAudioBufferLoopEnd
+
+{-| Set the ending point for the looping in seconds. -}
+setAudioBufferLoopEnd : Float -> AudioBufferSourceNode -> AudioBufferSourceNode
+setAudioBufferLoopEnd = Native.WebAudio.setAudioBufferLoopEnd
+
+{-| Start the AudioBufferSourceNode
+
+The parameters are:
+* The start time, relative to the context's current time
+* The offset into the AudioBuffer to start at, in seconds
+* The duration to play - if Nothing, plays until the end
+-}
+startAudioBufferNode : Float -> Float -> Maybe Float -> AudioBufferSourceNode -> AudioBufferSourceNode
+startAudioBufferNode = Native.WebAudio.startAudioBufferNode
+
+{-| Stops the AudioBufferSourceNode
+
+You may specify when to stop it.
+-}
+stopAudioBufferNode : Float -> AudioBufferSourceNode -> AudioBufferSourceNode
+stopAudioBufferNode = Native.WebAudio.stopAudioBufferNode
+
 
 
 
