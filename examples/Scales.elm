@@ -1,14 +1,20 @@
-import Graphics.Input (..)
-import WebAudio (..)
+import Graphics.Element exposing (..)
+import Graphics.Input exposing (..)
+import Text
+import WebAudio exposing (..)
+import Maybe exposing (withDefault)
+import Debug exposing (crash)
+import Signal exposing ((<~), (~))
+import Time exposing (Time, every)
 
 -- Models
 
-type HalfStep = Float
-type Label = String
+type alias HalfStep = Float
+type alias Label = String
 
-data Tonic = Tonic Label HalfStep
-data Scale = Scale String [HalfStep]
-data MusicState = Playing OscillatorNode HalfStep [HalfStep] Time | Paused
+type Tonic = Tonic Label HalfStep
+type Scale = Scale String (List HalfStep)
+type MusicState = Playing OscillatorNode HalfStep (List HalfStep) Time | Paused
 
 tonics = [ Tonic "A" 0
          , Tonic "A#/Bb" 1
@@ -28,7 +34,16 @@ musicalScales = [ Scale "Major" [0, 2, 2, 1, 2, 2, 2, 1]
                 , Scale "Minor" [0, 2, 1, 2, 2, 1, 2, 2]
                 ]
 
-visualModel = {tonic = head tonics, scale = head musicalScales}
+headOrDie lst err =
+    let x = List.head lst
+    in case x of
+         Just x' -> x'
+         Nothing -> crash err
+
+visualModel = { tonic = headOrDie tonics "No tonics defined"
+              , scale = headOrDie musicalScales "No scales defined"
+              }
+
 musicModel = {state = Paused, changed = False, buttonCount = 0}
 
 getTonicLabel (Tonic label _) = label
@@ -80,28 +95,46 @@ updateMusic (vmodel,btncnt,t) mmodel =
 
 -- Input
 
-tonicInput = input visualModel.tonic
-scaleInput = input visualModel.scale
-playInput = input visualModel
+tonicInput : Signal.Mailbox Tonic
+tonicInput = Signal.mailbox visualModel.tonic
 
-musicSignal = lift3 (,,) playInput.signal (count playInput.signal) (every 350.0)
-visualSignal = lift2 (\t s -> {tonic = t, scale = s}) tonicInput.signal scaleInput.signal
+scaleInput : Signal.Mailbox Scale
+scaleInput = Signal.mailbox visualModel.scale
+
+playInput = Signal.mailbox ()
+
+playCount : Signal Int
+playCount = Signal.foldp (\_ total -> total + 1) 0 playInput.signal
+
+deadLetter = Signal.mailbox ()
+
+visualSignal = Signal.map2 (\t s -> {tonic = t, scale = s}) tonicInput.signal scaleInput.signal
+musicSignal = Signal.map3 (,,) visualSignal (playCount) (Time.every 350.0)
 
 
 
 -- Render
 
-checkboxWithLabel label handle f checked = container 70 30 middle <| flow right [checkbox handle f checked, plainText label]
+checkboxWithLabel : String -> (Bool -> Signal.Message) -> Bool -> Element
+checkboxWithLabel label handler checked =
+    container 70 30 middle <| flow right [checkbox handler checked
+                                         , leftAligned (Text.monospace (Text.fromString label))
+                                         ]
+
+onOff : Signal.Address a -> a -> Bool -> Signal.Message
+onOff addr toSend checked =
+    if checked then Signal.message addr toSend else Signal.message deadLetter.address ()
 
 tonicBoxes tonic =
-  let box t = checkboxWithLabel (getTonicLabel t) tonicInput.handle (\_ -> t) (t == tonic)
-  in flow right <| map box tonics
+  let box t = checkboxWithLabel (getTonicLabel t) (onOff tonicInput.address t) (t == tonic)
+  in flow right <| List.map box tonics
 
 scaleBoxes scale =
-  let box s = checkboxWithLabel (getScaleLabel s) scaleInput.handle (\_ -> s) (s == scale)
-  in flow right <| map box musicalScales
+  let box s = checkboxWithLabel (getScaleLabel s) (onOff scaleInput.address s) (s == scale)
+  in flow right <| List.map box musicalScales
 
-playButton vmodel mmodel = button playInput.handle vmodel (if (isPlaying mmodel.state) then "Stop" else "Play")
+playButton vmodel mmodel =
+    button (Signal.message playInput.address ()) (if (isPlaying mmodel.state) then "Stop" else "Play")
 
 render (vmodel,mmodel) =
   flow down [ tonicBoxes vmodel.tonic
@@ -109,10 +142,8 @@ render (vmodel,mmodel) =
             , playButton vmodel mmodel
             ]
 
-
-
 -- Main
 
-mainMusic = foldp updateMusic musicModel musicSignal |> keepIf (\m -> m.changed || (isPlaying m.state)) musicModel
-main = render <~ (lift2 (,) visualSignal mainMusic)
+mainMusic = Signal.foldp updateMusic musicModel musicSignal |> Signal.filter (\m -> m.changed || (isPlaying m.state)) musicModel
+main = render <~ (Signal.map2 (,) visualSignal mainMusic)
 
