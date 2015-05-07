@@ -212,7 +212,7 @@ getCurrentTime : AudioContext -> Float
 getCurrentTime = Native.WebAudio.getCurrentTime
 
 {-| The OfflineAudioContext -}
-type alias OfflineAudioContext = {context: AudioContext, signal: Signal Maybe AudioBuffer}
+type alias OfflineAudioContext = {context: AudioContext, signal: Signal (Maybe AudioBuffer)}
 
 {-| Create a new Offline AudioContext
 
@@ -290,7 +290,7 @@ cancelScheduledValues = Native.WebAudio.cancelScheduledValues
 type AudioBuffer = AudioBuffer
 
 {-| Load an Audio Buffer from a URL -}
-loadAudioBufferFromUrl: AudioContext -> String -> Signal Maybe AudioBuffer
+loadAudioBufferFromUrl: AudioContext -> String -> Signal (Maybe AudioBuffer)
 loadAudioBufferFromUrl = Native.WebAudio.loadAudioBufferFromUrl
 
 {-| Retrieve the sample rate of the AudioBuffer -}
