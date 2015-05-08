@@ -301,13 +301,17 @@ Elm.Native.WebAudio.make = function(elm) {
   };
 
   buildGetter('AudioBufferFromNode', 'buffer');
-  buildSetter('AudioBufferForNode', 'buffer');
+  values.setAudioBufferForNode = F2(function(value, node) {
+    node._node.buffer = value._buffer;
+    return node;
+  });
+
   buildProperty('AudioBufferIsLooping', 'loop');
   buildProperty('AudioBufferLoopStart', 'loopStart');
   buildProperty('AudioBufferLoopEnd', 'loopEnd');
 
   values.startAudioBufferNode = F4(function(when, offset, duration, node) {
-    if (Maybe.isNothing(duration))
+    if (duration.ctor == "Nothing")
       node._node.start(when, offset);
     else
       node._node.start(when, offset, duration._0);
