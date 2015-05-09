@@ -457,6 +457,7 @@ Elm.Native.WebAudio.make = function(elm) {
   /* MediaElementAudioSourceNode */
   values.createHiddenMediaElementAudioSourceNode = function(context) {
     var element = new Audio();
+    element.crossOrigin = "anonymous";
     return A2(values.createMediaElementAudioSourceNode, context, element);
   };
 
