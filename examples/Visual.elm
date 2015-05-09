@@ -1,13 +1,28 @@
 module Visual where
 
-import Color (rgb,black,darkRed,lightRed,orange)
-import Graphics.Collage (..)
-import Graphics.Input (button,input)
-import Graphics.Input.Field (Content,Forward,Selection,defaultStyle,field,noContent)
+import Color exposing (rgb, black, darkRed, lightRed, orange)
+import Debug exposing (crash)
+import Graphics.Collage exposing (..)
+import Graphics.Element exposing (..)
+import Graphics.Input exposing (button)
+import Graphics.Input.Field exposing (Content, Direction (..), Selection,
+                                      defaultStyle, field, noContent)
+import Maybe exposing (withDefault)
 import Mouse
-import Transform2D (matrix,translation)
-import WebAudio (..)
+import Signal exposing ((<~), (~))
+import Time
+import Transform2D exposing (matrix, translation)
+import WebAudio exposing (..)
 import Window
+
+doOrDie f lst err =
+    let x = f lst
+    in case x of
+         Just x' -> x'
+         Nothing -> crash err
+
+headOrDie = doOrDie List.head
+tailOrDie = doOrDie List.tail
 
 -- Models
 
@@ -19,15 +34,17 @@ filters =
     makeFilter f = createBiquadFilterNode DefaultContext
                    |> setFilterType Peaking
                    |> tapNode .frequency (\freq -> setValue f freq)
-    rlst = map makeFilter (reverse frequencies)
-    end = head rlst |> setFilterType HighShelf |> connectNodes analyser 0 0
-    lst = reverse <| scanl (\c p -> connectNodes p 0 0 c) end (tail rlst)
-  in
-    (setFilterType LowShelf (head lst)) :: (tail lst)
+    rlst = List.map makeFilter (List.reverse frequencies)
+    end = headOrDie rlst "no filters" 
+          |> setFilterType HighShelf
+          |> connectNodes analyser 0 0
+    lst = List.reverse <| List.scanl (\c p -> connectNodes p 0 0 c) end (tailOrDie rlst "no filters")
+  in case lst of
+       x::xs -> (setFilterType LowShelf x) :: xs
 
 mediaStream = createHiddenMediaElementAudioSourceNode DefaultContext
               |> setMediaElementIsLooping True
-              |> connectNodes (head filters) 0 0
+              |> connectNodes (headOrDie filters "no filters") 0 0
 
 sliderSize = {w = 20.0, h = 100.0}
 
@@ -41,9 +58,10 @@ slidersState =
   , changes = False
   }
 
-isSelectedSlider idx state = maybe False (\(i,_) -> i == idx) state.selected
+isSelectedSlider idx state = 
+    withDefault False <| Maybe.map (\(i,_) -> i == idx) state.selected
 
-sliderValueClamp = (max -40.0) . (min 40.0)
+sliderValueClamp = (max -40.0) << (min 40.0)
 
 controlState =
   { playing = False
@@ -79,9 +97,9 @@ selectSlider (w',h') (x',y') state =
     (w,h) = (toFloat w', toFloat h')
     x = toFloat x' - w / 2.0 + state.move * 5.0
     y = h / 4.0 - toFloat y'
-    lst = zip [ 0 .. length filters - 1 ] filters
-    filtered = filter (\(i,f) -> handleHitTest (x - (toFloat i + 0.5) * state.move) y state.scale f) lst
-    selected = if length filtered > 0 then Just (head filtered) else Nothing
+    lst = List.indexedMap (,) filters
+    filtered = List.filter (\(i,f) -> handleHitTest (x - (toFloat i + 0.5) * state.move) y state.scale f) lst
+    selected = List.head filtered
   in
     updateSelectedSlider (x',y') {state | selected <- selected, dragging <- True}
 
@@ -105,7 +123,8 @@ updateSliders (dim,isdown,pos) state =
      | isdown -> if state.dragging then (updateSelectedSlider pos state) else (selectSlider dim pos state)
      | otherwise -> disableSelectedSlider pos state
 
-updateTrack = playMediaElement . (maybe mediaStream (\url -> setMediaElementSource url mediaStream))
+updateTrack = 
+    playMediaElement << (withDefault mediaStream << Maybe.map (\url -> setMediaElementSource url mediaStream))
 
 pauseMusic state =
   let _ = pauseMediaElement mediaStream
@@ -123,17 +142,19 @@ updateControls (cnt,url) state =
 
 -- Input
 
-slidersInput = lift3 (,,)
+slidersInput = Signal.map3 (,,)
   Window.dimensions
   Mouse.isDown
   Mouse.position
 
-playButtonInput = input controlState.playing
+playButtonInput = Signal.mailbox controlState.playing
 
-urlFieldInput = input controlState.url
+playButtonCount = Signal.foldp (\_ total -> total + 1) 0 playButtonInput.signal
 
-controlInput = lift2 (,)
-  (count playButtonInput.signal)
+urlFieldInput = Signal.mailbox controlState.url
+
+controlInput = Signal.map2 (,)
+  playButtonCount
   urlFieldInput.signal
 
 port soundUrl : Signal (Maybe String)
@@ -157,23 +178,23 @@ renderSliders w h state =
       in
         groupTransform (matrix state.scale 0 0 state.scale x 0) (renderSlider val selected)
   in
-    groupTransform (translation (0 - state.move * 5.0) (h / 2.0)) <| zipWith slider [ 0 .. length filters - 1 ] filters
+    groupTransform (translation (0 - state.move * 5.0) (h / 2.0)) <| List.indexedMap slider filters
 
 renderControls w state =
   let
-    btn = button playButtonInput.handle (not state.playing) (if state.playing then "Pause" else "Play")
-    url = field defaultStyle urlFieldInput.handle id "SoundCloud Permalink URL" state.url |> width (round (w / 2) - widthOf btn)
+    btn = button (Signal.message playButtonInput.address (not state.playing)) (if state.playing then "Pause" else "Play")
+    url = field defaultStyle (Signal.message urlFieldInput.address) "SoundCloud Permalink URL" state.url |> width (round (w / 2) - widthOf btn)
   in
     beside btn url |> toForm
 
 renderAnalyser w h freqdata =
   let
-    barWidth = w / (toFloat . length) freqdata
+    barWidth = w / (toFloat << List.length) freqdata
     draw idx datum =
       let barHeight = h * toFloat datum / 255.0
       in rect barWidth barHeight |> filled orange |> move ((toFloat idx + 0.5) * barWidth,(barHeight - h) / 2.0)
   in
-    groupTransform (translation (0 - w / 2.0) (h / -2.0)) <| zipWith draw [ 0 .. length freqdata - 1 ] freqdata
+    groupTransform (translation (0 - w / 2.0) (h / -2.0)) <| List.indexedMap (flip draw) freqdata
 
 render (w',h') sliderState controlState freqdata =
   let
@@ -195,16 +216,15 @@ render (w',h') sliderState controlState freqdata =
 
 mainMediaStream = updateTrack <~ soundUrl
 
-mainSliders = foldp updateSliders slidersState slidersInput |> keepIf (\m -> m.changes) slidersState
+mainSliders = Signal.foldp updateSliders slidersState slidersInput |> Signal.filter (\m -> m.changes) slidersState
 
-mainControls = foldp updateControls controlState controlInput
+mainControls = Signal.foldp updateControls controlState controlInput
 
 port fetchSoundUrl : Signal String
-port fetchSoundUrl = (\{url} -> url.string) <~ keepIf (\{loadTrack} -> loadTrack) controlState mainControls
+port fetchSoundUrl = (\{url} -> url.string) <~ Signal.filter (\{loadTrack} -> loadTrack) controlState mainControls
 
-main = lift4 render
-  Window.dimensions
-  mainSliders
-  mainControls
-  ((\_ -> getByteFrequencyData analyser) <~ every 50.0)
+main = render <~ Window.dimensions
+              ~ mainSliders
+              ~ mainControls
+              ~ ((\_ -> getByteFrequencyData analyser) <~ Time.every 50.0)
 

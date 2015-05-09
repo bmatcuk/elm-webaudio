@@ -5,3 +5,5 @@ cache/
 *.elmi
 *.elmo
 *.swp
+elm-stuff
+elm.js

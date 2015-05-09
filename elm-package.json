@@ -1,0 +1,15 @@
+{
+    "version": "1.0.0",
+    "summary": "Elm library for accessing the Web Audio API",
+    "repository": "https://github.com/bmatcuk/elm-webaudio.git",
+    "license": "BSD3",
+    "native-modules": true,
+    "source-directories": [
+        "."
+    ],
+    "exposed-modules": ["WebAudio"],
+    "dependencies": {
+        "elm-lang/core": "2.0.1 <= v < 3.0.0"
+    },
+    "elm-version": "0.15.0 <= v < 0.16.0"
+}
