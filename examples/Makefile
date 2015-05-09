@@ -1,5 +1,5 @@
 EXAMPLES := $(wildcard *.elm)
-TARGETS := $(addprefix build/,$(EXAMPLES:.elm=.html))
+TARGETS := $(addprefix build/,$(EXAMPLES:.elm=.html)) build/Visual.js
 
 INCLUDE_DIR := ..
 INCLUDE_FILES := $(wildcard $(INCLUDE_DIR)/*.elm)
