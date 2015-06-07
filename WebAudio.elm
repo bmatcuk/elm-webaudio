@@ -879,3 +879,4 @@ setVelocity = Native.WebAudio.setVelocity
 
 {-| TODO: Type of a ScriptProcessorNode -}
 {-| TODO: Type of a WaveShaperNode -}
+
