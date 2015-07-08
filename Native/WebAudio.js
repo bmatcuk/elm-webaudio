@@ -433,7 +433,7 @@ Elm.Native.WebAudio.make = function(elm) {
   values.createDynamicsCompressorNode = function(context) {
     var node = extractContext(context).createDynamicsCompressor();
     var ret = buildAudioNode(node);
-    buildAudioParam('threshold', 'treshold', ret);
+    buildAudioParam('threshold', 'threshold', ret);
     buildAudioParam('knee', 'knee', ret);
     buildAudioParam('ratio', 'ratio', ret);
     buildAudioParam('reduction', 'reduction', ret);
