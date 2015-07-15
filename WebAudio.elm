@@ -184,7 +184,7 @@ These nodes are currently unimplemented.
 -}
 
 import Native.WebAudio
-
+import UserMedia exposing (MediaStream)
 
 
 {-| The AudioContext
@@ -722,8 +722,13 @@ pauseMediaElement = Native.WebAudio.pauseMediaElement
 
 
 
+type alias MediaStreamAudioSourceNode = AudioNode {}
+
+createMediaStreamSourceNode : AudioContext -> MediaStream -> MediaStreamAudioSourceNode
+createMediaStreamSourceNode = Native.WebAudio.createMediaStreamSourceNode
+
+
 {- TODO: Type of a MediaStreamAudioDestinationNode -}
-{- TODO: Type of a MediaStreamAudioSourceNode -}
 
 
 

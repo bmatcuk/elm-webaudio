@@ -498,6 +498,12 @@ Elm.Native.WebAudio.make = function(elm) {
   };
 
 
+  /* MediaStreamAudioSourceNode */
+  values.createMediaStreamAudioSourceNode = F2(function(context, source) {
+      var node = extractContext(context).createMediaStreamSource(source);
+      return buildAudioNode(node);
+  });
+
 
   /* OscillatorNode */
   function setOscillatorWaveType(type, node) {
