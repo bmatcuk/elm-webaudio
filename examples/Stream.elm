@@ -8,11 +8,10 @@ view model =
     case model of
         Nothing -> div [] [ text "Nothing" ]
         Just stream ->
-            -- I would expect this to immediately feed me back the microphone input
-            let node = createMediaStreamSourceNode DefaultContext stream
+            let node = createMediaStreamAudioSourceNode DefaultContext stream
                         |> connectNodes (getDestinationNode DefaultContext) 0 0
             in
-               div [] [ text "Got user media" ]
+               div [] [ text ("Got user media : " ++ (.label stream)) ]
 
 {-| send one time request for usermedia, stream is then forwarded to the
     mailbox
