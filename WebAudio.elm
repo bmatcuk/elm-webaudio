@@ -724,8 +724,8 @@ pauseMediaElement = Native.WebAudio.pauseMediaElement
 
 type alias MediaStreamAudioSourceNode = AudioNode {}
 
-createMediaStreamSourceNode : AudioContext -> MediaStream -> MediaStreamAudioSourceNode
-createMediaStreamSourceNode = Native.WebAudio.createMediaStreamSourceNode
+createMediaStreamAudioSourceNode : AudioContext -> MediaStream -> MediaStreamAudioSourceNode
+createMediaStreamAudioSourceNode = Native.WebAudio.createMediaStreamAudioSourceNode
 
 
 {- TODO: Type of a MediaStreamAudioDestinationNode -}
