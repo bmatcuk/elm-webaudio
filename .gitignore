@@ -7,3 +7,5 @@ cache/
 *.swp
 elm-stuff
 elm.js
+UserMedia.elm
+Native/UserMedia.js
