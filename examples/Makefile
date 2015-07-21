@@ -1,9 +1,8 @@
 EXAMPLES := $(wildcard *.elm)
 TARGETS := $(addprefix build/,$(EXAMPLES:.elm=.html)) build/Visual.js
 
-INCLUDE_DIR := ..
-INCLUDE_FILES := $(wildcard $(INCLUDE_DIR)/*.elm)
-SCRIPTS := $(wildcard ../Native/*.js)
+INCLUDE_FILES := $(wildcard ../*.elm) $(wildcard ../lib/elm-usermedia/src/*.elm)
+SCRIPTS := $(wildcard ../Native/*.js) $(wildcard ../lib/elm-usermedia/src/Native/*.js)
 
 .PHONY: all
 all: $(TARGETS)
@@ -11,10 +10,10 @@ all: $(TARGETS)
 $(TARGETS): $(INCLUDE_FILES) $(SCRIPTS)
 
 build/%.js: %.elm
-	cd $(INCLUDE_DIR) && elm-make --yes $(CURDIR)/$< --output $(CURDIR)/$@
+	elm-make --yes $(CURDIR)/$< --output $(CURDIR)/$@
 
 build/%.html: %.elm
-	cd $(INCLUDE_DIR) && elm-make --yes $(CURDIR)/$< --output $(CURDIR)/$@
+	elm-make --yes $(CURDIR)/$< --output $(CURDIR)/$@
 	@echo "** Open $@ in your browser"
 
 # The following rules are for the "Visual" example:
@@ -29,3 +28,4 @@ else
 	@echo "** in the same directory as this Makefile and it will"
 	@echo "** automatically get added when you 'make'"
 endif
+
