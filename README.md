@@ -1,6 +1,15 @@
 elm-webaudio
 ============
 
+**ABANDONED**: This project has been abandoned. When this library was authored,
+there was no good way to put a functional wrapper around a very non-functional
+API such as WebAudio. I thought this was a decent attempt, for the time. Since
+then, elm has grown to include new language constructs that would make the
+implementation easier. However, I do not have the time or interest to rewrite
+this library using the new language features. If you'd like to take the torch,
+[submit an issue](https://github.com/bmatcuk/elm-webaudio/issues) with your
+project's URL and I'll include it in this README so that others may find it.
+
 The `elm-webaudio` library connects your [Elm](http://elm-lang.org/) programs
 to the [Web Audio API](http://webaudio.github.io/web-audio-api/). This library
 is somewhat experimental and incomplete, but it is useable. Check out an example
