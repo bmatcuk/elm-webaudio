@@ -1,6 +1,8 @@
 elm-webaudio
 ============
 
+This project is abandoned! It has been superseded by [trotha01's implementation](https://github.com/trotha01/elm-webaudio).
+
 **ABANDONED**: This project has been abandoned. When this library was authored,
 there was no good way to put a functional wrapper around a very non-functional
 API such as WebAudio. I thought this was a decent attempt, for the time. Since
